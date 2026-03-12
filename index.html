@@ -1,0 +1,710 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>星空指数</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@300;400&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --deep: #03040a;
+    --navy: #080c1a;
+    --indigo: #0d1535;
+    --star: #e8eeff;
+    --gold: #f0c060;
+    --blue-glow: #4a7fd4;
+    --red-glow: #ff6b6b;
+    --green-glow: #6bffb8;
+    --muted: #5a6a8a;
+  }
+
+  body {
+    background: var(--deep);
+    color: var(--star);
+    font-family: 'Space Mono', monospace;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* 星背景 */
+  .stars-bg {
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    overflow: hidden;
+  }
+  .stars-bg::before, .stars-bg::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image:
+      radial-gradient(1px 1px at 10% 15%, rgba(255,255,255,0.8) 0%, transparent 100%),
+      radial-gradient(1px 1px at 25% 40%, rgba(255,255,255,0.6) 0%, transparent 100%),
+      radial-gradient(1.5px 1.5px at 40% 10%, rgba(255,255,255,0.9) 0%, transparent 100%),
+      radial-gradient(1px 1px at 55% 60%, rgba(255,255,255,0.5) 0%, transparent 100%),
+      radial-gradient(1px 1px at 70% 25%, rgba(255,255,255,0.7) 0%, transparent 100%),
+      radial-gradient(2px 2px at 80% 70%, rgba(255,255,255,0.4) 0%, transparent 100%),
+      radial-gradient(1px 1px at 90% 45%, rgba(255,255,255,0.8) 0%, transparent 100%),
+      radial-gradient(1px 1px at 15% 75%, rgba(255,255,255,0.6) 0%, transparent 100%),
+      radial-gradient(1.5px 1.5px at 35% 85%, rgba(255,255,255,0.5) 0%, transparent 100%),
+      radial-gradient(1px 1px at 60% 90%, rgba(255,255,255,0.7) 0%, transparent 100%),
+      radial-gradient(1px 1px at 75% 5%, rgba(255,255,255,0.9) 0%, transparent 100%),
+      radial-gradient(2px 2px at 5% 50%, rgba(255,255,255,0.3) 0%, transparent 100%),
+      radial-gradient(1px 1px at 45% 30%, rgba(200,220,255,0.8) 0%, transparent 100%),
+      radial-gradient(1px 1px at 85% 85%, rgba(255,255,255,0.6) 0%, transparent 100%),
+      radial-gradient(1.5px 1.5px at 20% 20%, rgba(255,255,255,0.7) 0%, transparent 100%);
+  }
+  .stars-bg::after {
+    background-image:
+      radial-gradient(1px 1px at 8% 35%, rgba(255,255,255,0.5) 0%, transparent 100%),
+      radial-gradient(1px 1px at 32% 55%, rgba(255,255,255,0.7) 0%, transparent 100%),
+      radial-gradient(2px 2px at 48% 78%, rgba(200,220,255,0.6) 0%, transparent 100%),
+      radial-gradient(1px 1px at 63% 18%, rgba(255,255,255,0.8) 0%, transparent 100%),
+      radial-gradient(1px 1px at 77% 48%, rgba(255,255,255,0.5) 0%, transparent 100%),
+      radial-gradient(1.5px 1.5px at 92% 22%, rgba(255,255,255,0.7) 0%, transparent 100%),
+      radial-gradient(1px 1px at 18% 92%, rgba(255,255,255,0.4) 0%, transparent 100%),
+      radial-gradient(1px 1px at 52% 42%, rgba(255,255,255,0.6) 0%, transparent 100%),
+      radial-gradient(1px 1px at 88% 62%, rgba(200,220,255,0.8) 0%, transparent 100%);
+    animation: twinkle 4s ease-in-out infinite alternate;
+  }
+  @keyframes twinkle {
+    from { opacity: 0.6; }
+    to { opacity: 1; }
+  }
+
+  /* メインコンテナ */
+  .container {
+    position: relative;
+    z-index: 1;
+    max-width: 480px;
+    margin: 0 auto;
+    padding: 40px 20px 60px;
+  }
+
+  /* ヘッダー */
+  .header {
+    text-align: center;
+    margin-bottom: 40px;
+    animation: fadeDown 0.8s ease both;
+  }
+  .header h1 {
+    font-family: 'Noto Serif JP', serif;
+    font-weight: 300;
+    font-size: 2rem;
+    letter-spacing: 0.3em;
+    color: var(--star);
+    text-shadow: 0 0 30px rgba(74,127,212,0.6);
+    margin-bottom: 6px;
+  }
+  .header p {
+    font-size: 0.65rem;
+    letter-spacing: 0.2em;
+    color: var(--muted);
+    text-transform: uppercase;
+  }
+
+  /* 検索 */
+  .search-box {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 32px;
+    animation: fadeDown 0.8s ease 0.1s both;
+  }
+  .search-box input {
+    flex: 1;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 4px;
+    padding: 12px 16px;
+    color: var(--star);
+    font-family: 'Space Mono', monospace;
+    font-size: 0.8rem;
+    outline: none;
+    transition: border-color 0.3s;
+  }
+  .search-box input::placeholder { color: var(--muted); }
+  .search-box input:focus { border-color: var(--blue-glow); }
+  .search-box button {
+    background: var(--blue-glow);
+    border: none;
+    border-radius: 4px;
+    padding: 12px 18px;
+    color: white;
+    font-family: 'Space Mono', monospace;
+    font-size: 0.75rem;
+    cursor: pointer;
+    transition: opacity 0.2s, transform 0.1s;
+    white-space: nowrap;
+  }
+  .search-box button:hover { opacity: 0.85; }
+  .search-box button:active { transform: scale(0.97); }
+
+  /* 現在時刻 */
+  .time-display {
+    text-align: center;
+    margin-bottom: 28px;
+    animation: fadeDown 0.8s ease 0.15s both;
+  }
+  .time-display .time {
+    font-size: 2.2rem;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    color: var(--gold);
+    text-shadow: 0 0 20px rgba(240,192,96,0.4);
+  }
+  .time-display .date {
+    font-size: 0.7rem;
+    color: var(--muted);
+    letter-spacing: 0.15em;
+    margin-top: 4px;
+  }
+  .time-display .location-name {
+    font-size: 0.75rem;
+    color: var(--star);
+    letter-spacing: 0.1em;
+    margin-top: 8px;
+    opacity: 0.7;
+  }
+
+  /* メーターゲージ */
+  .gauge-section {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-bottom: 32px;
+    animation: fadeDown 0.8s ease 0.2s both;
+  }
+  .gauge-wrap {
+    position: relative;
+    width: 200px;
+    height: 110px;
+    margin-bottom: 16px;
+  }
+  .gauge-svg { width: 100%; height: 100%; }
+  .gauge-bg {
+    fill: none;
+    stroke: rgba(255,255,255,0.06);
+    stroke-width: 12;
+    stroke-linecap: round;
+  }
+  .gauge-fill {
+    fill: none;
+    stroke-width: 12;
+    stroke-linecap: round;
+    transition: stroke-dashoffset 1.5s cubic-bezier(0.4, 0, 0.2, 1), stroke 0.5s;
+  }
+  .gauge-score {
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    text-align: center;
+  }
+  .gauge-score .number {
+    font-size: 2.8rem;
+    font-weight: 700;
+    line-height: 1;
+  }
+  .gauge-score .unit {
+    font-size: 0.7rem;
+    color: var(--muted);
+    letter-spacing: 0.1em;
+  }
+  .gauge-label {
+    font-family: 'Noto Serif JP', serif;
+    font-size: 1rem;
+    letter-spacing: 0.2em;
+    color: var(--star);
+  }
+
+  /* カード群 */
+  .cards {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-bottom: 20px;
+    animation: fadeDown 0.8s ease 0.3s both;
+  }
+  .card {
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.07);
+    border-radius: 8px;
+    padding: 16px;
+    transition: border-color 0.3s;
+  }
+  .card:hover { border-color: rgba(255,255,255,0.15); }
+  .card .card-label {
+    font-size: 0.6rem;
+    letter-spacing: 0.2em;
+    color: var(--muted);
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+  .card .card-value {
+    font-size: 1.3rem;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+  }
+  .card .card-sub {
+    font-size: 0.65rem;
+    color: var(--muted);
+    margin-top: 4px;
+  }
+
+  /* 光害バー */
+  .pollution-card {
+    grid-column: 1 / -1;
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.07);
+    border-radius: 8px;
+    padding: 16px;
+    animation: fadeDown 0.8s ease 0.35s both;
+  }
+  .pollution-card .card-label {
+    font-size: 0.6rem;
+    letter-spacing: 0.2em;
+    color: var(--muted);
+    text-transform: uppercase;
+    margin-bottom: 12px;
+  }
+  .pollution-bar-wrap {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .pollution-bar {
+    flex: 1;
+    height: 6px;
+    background: rgba(255,255,255,0.06);
+    border-radius: 3px;
+    overflow: hidden;
+  }
+  .pollution-bar-fill {
+    height: 100%;
+    border-radius: 3px;
+    transition: width 1.2s cubic-bezier(0.4, 0, 0.2, 1), background 0.5s;
+  }
+  .pollution-level {
+    font-size: 0.75rem;
+    font-weight: 700;
+    white-space: nowrap;
+  }
+
+  /* アドバイス */
+  .advice {
+    background: rgba(74,127,212,0.08);
+    border: 1px solid rgba(74,127,212,0.2);
+    border-radius: 8px;
+    padding: 16px 20px;
+    font-family: 'Noto Serif JP', serif;
+    font-size: 0.85rem;
+    line-height: 1.8;
+    color: rgba(232,238,255,0.85);
+    letter-spacing: 0.05em;
+    animation: fadeDown 0.8s ease 0.4s both;
+    min-height: 60px;
+  }
+
+  /* ローディング */
+  .loading {
+    text-align: center;
+    padding: 40px;
+    color: var(--muted);
+    font-size: 0.75rem;
+    letter-spacing: 0.2em;
+    animation: pulse 1.5s ease-in-out infinite;
+  }
+  @keyframes pulse {
+    0%, 100% { opacity: 0.4; }
+    50% { opacity: 1; }
+  }
+
+  /* エラー */
+  .error-msg {
+    text-align: center;
+    padding: 20px;
+    color: var(--red-glow);
+    font-size: 0.75rem;
+    letter-spacing: 0.1em;
+  }
+
+  @keyframes fadeDown {
+    from { opacity: 0; transform: translateY(-12px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+
+  /* ショートカット */
+  .shortcuts {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-top: -20px;
+    margin-bottom: 24px;
+    animation: fadeDown 0.8s ease 0.15s both;
+  }
+  .shortcut-label {
+    font-size: 0.6rem;
+    color: var(--muted);
+    letter-spacing: 0.1em;
+  }
+  .shortcut-btn {
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 20px;
+    padding: 4px 12px;
+    color: var(--star);
+    font-family: 'Noto Serif JP', serif;
+    font-size: 0.75rem;
+    cursor: pointer;
+    transition: background 0.2s, border-color 0.2s;
+  }
+  .shortcut-btn:hover {
+    background: rgba(74,127,212,0.2);
+    border-color: var(--blue-glow);
+  }
+  /* 月齢アイコン */
+  .moon-icon {
+    font-size: 1.8rem;
+    line-height: 1;
+  }
+</style>
+</head>
+<body>
+
+<div class="stars-bg"></div>
+
+<div class="container">
+  <div class="header">
+    <h1>星 空 指 数</h1>
+    <p>Stargazing Index</p>
+  </div>
+
+  <div class="search-box">
+    <input type="text" id="locationInput" placeholder="例: Matsusaka / Ise / Meiwa" />
+    <button onclick="search()">検索</button>
+  </div>
+
+  <div class="shortcuts">
+    <span class="shortcut-label">三重県：</span>
+    <button class="shortcut-btn" onclick="quickSearch('Matsusaka')">松阪</button>
+    <button class="shortcut-btn" onclick="quickSearch('Ise')">伊勢</button>
+    <button class="shortcut-btn" onclick="quickSearch('Meiwa')">明和</button>
+    <button class="shortcut-btn" onclick="quickSearch('Tsu')">津</button>
+    <button class="shortcut-btn" onclick="quickSearch('Owase')">尾鷲</button>
+  </div>
+
+  <div class="time-display">
+    <div class="time" id="clockDisplay">--:--</div>
+    <div class="date" id="dateDisplay">---</div>
+    <div class="location-name" id="locationDisplay">場所を検索してください</div>
+  </div>
+
+  <div id="mainContent">
+    <div class="loading">SEARCHING THE SKY...</div>
+  </div>
+</div>
+
+<script>
+// 時計更新
+function updateClock() {
+  const now = new Date();
+  const h = String(now.getHours()).padStart(2,'0');
+  const m = String(now.getMinutes()).padStart(2,'0');
+  document.getElementById('clockDisplay').textContent = h + ':' + m;
+  
+  const days = ['日','月','火','水','木','金','土'];
+  const dateStr = `${now.getFullYear()}.${String(now.getMonth()+1).padStart(2,'0')}.${String(now.getDate()).padStart(2,'0')} (${days[now.getDay()]})`;
+  document.getElementById('dateDisplay').textContent = dateStr;
+}
+setInterval(updateClock, 1000);
+updateClock();
+
+// 月齢計算
+function getMoonPhase() {
+  const now = new Date();
+  const known = new Date(2000, 0, 6, 18, 14, 0);
+  const diff = (now - known) / (1000 * 60 * 60 * 24);
+  const cycle = 29.53058867;
+  const phase = ((diff % cycle) + cycle) % cycle;
+  const pct = phase / cycle;
+  
+  let icon, name, impact;
+  if (pct < 0.03 || pct > 0.97) { icon='🌑'; name='新月'; impact=0; }
+  else if (pct < 0.22) { icon='🌒'; name='三日月'; impact=15; }
+  else if (pct < 0.28) { icon='🌓'; name='上弦'; impact=40; }
+  else if (pct < 0.47) { icon='🌔'; name='十三夜'; impact=65; }
+  else if (pct < 0.53) { icon='🌕'; name='満月'; impact=100; }
+  else if (pct < 0.72) { icon='🌖'; name='十六夜'; impact=70; }
+  else if (pct < 0.78) { icon='🌗'; name='下弦'; impact=45; }
+  else { icon='🌘'; name='有明月'; impact=20; }
+  
+  return { icon, name, impact, phase: Math.round(pct * 100) };
+}
+
+// 星空指数計算
+function calcStarIndex(weather, moon) {
+  const clouds = weather.cloud_cover ?? 0;
+  const humidity = weather.relative_humidity_2m ?? 50;
+  const vis = weather.visibility ?? 10000;
+  
+  // 雲量スコア (0-40点)
+  const cloudScore = Math.round((1 - clouds/100) * 40);
+  // 湿度スコア (0-25点)
+  const humScore = Math.round((1 - Math.min(humidity, 100)/100) * 25);
+  // 視程スコア (0-20点)
+  const visScore = Math.round(Math.min(vis, 20000)/20000 * 20);
+  // 月明かりスコア (0-15点、月が明るいほど減点)
+  const moonScore = Math.round((1 - moon.impact/100) * 15);
+  
+  return Math.min(100, Math.max(0, cloudScore + humScore + visScore + moonScore));
+}
+
+// 光害レベル
+function getLightPollution(lat, lon) {
+  // 都市部判定（簡易）
+  // 実際の光害データがないため、都市の緯度経度から推定
+  const cities = [
+    { name: '東京', lat: 35.68, lon: 139.69, level: 9 },
+    { name: '大阪', lat: 34.69, lon: 135.50, level: 8 },
+    { name: '名古屋', lat: 35.18, lon: 136.91, level: 8 },
+    { name: '福岡', lat: 33.59, lon: 130.40, level: 7 },
+    { name: '札幌', lat: 43.06, lon: 141.35, level: 7 },
+    { name: '仙台', lat: 38.27, lon: 140.87, level: 6 },
+    { name: '広島', lat: 34.40, lon: 132.46, level: 6 },
+    { name: '神戸', lat: 34.69, lon: 135.19, level: 7 },
+    { name: '京都', lat: 35.01, lon: 135.77, level: 7 },
+    { name: '津', lat: 34.73, lon: 136.51, level: 4 },
+    { name: '松阪', lat: 34.58, lon: 136.53, level: 3 },
+    { name: '伊勢', lat: 34.49, lon: 136.71, level: 3 },
+  ];
+  
+  let minDist = Infinity;
+  let nearest = { level: 3 };
+  
+  for (const city of cities) {
+    const d = Math.sqrt((lat - city.lat)**2 + (lon - city.lon)**2);
+    if (d < minDist) {
+      minDist = d;
+      nearest = city;
+    }
+  }
+  
+  // 距離で補正
+  if (minDist > 1.5) return Math.max(1, nearest.level - 3);
+  if (minDist > 0.8) return Math.max(1, nearest.level - 1);
+  return nearest.level;
+}
+
+function getPollutionLabel(level) {
+  const labels = ['','星空公園級','山間部','郊外良好','郊外','準都市','都市周辺','都市部','大都市','大都市中心','都心'];
+  const colors = ['','#6bffb8','#6bffb8','#6bffb8','#a8ff78','#f0c060','#f0a030','#ff8040','#ff6060','#ff4040','#ff2020'];
+  return { label: labels[level] || '郊外', color: colors[level] || '#f0c060' };
+}
+
+function getScoreColor(score) {
+  if (score >= 75) return '#6bffb8';
+  if (score >= 50) return '#f0c060';
+  if (score >= 25) return '#f0a030';
+  return '#ff6b6b';
+}
+
+function getAdvice(score, moon, pollution) {
+  if (score >= 80) return `絶好の観測チャンス。${moon.name}で月明かりも${moon.impact < 30 ? '少なく' : 'あるが'}、天頂付近から始めるとよい。`;
+  if (score >= 60) return `まずまずの条件。${moon.name}の影響を避け、月と反対方向の空を狙おう。`;
+  if (score >= 40) return `雲や湿度が気になる夜。明るい星や惑星なら楽しめる。`;
+  if (score >= 20) return `観測は難しい条件。月や惑星の観察に切り替えるのも手。`;
+  return `今夜は星空が見えにくい。次の晴れを待とう。`;
+}
+
+// ジオコーディング
+async function geocode(place) {
+  // 「三重県」が含まれてない場合、まず三重県として試みる
+  const queries = [];
+  if (!place.includes('県') && !place.includes('都') && !place.includes('道') && !place.includes('府')) {
+    queries.push('三重県' + place);
+  }
+  queries.push(place);
+
+  for (const q of queries) {
+    const url = `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(q)}&count=5&language=ja&format=json`;
+    const res = await fetch(url);
+    const data = await res.json();
+    if (!data.results || data.results.length === 0) continue;
+
+    // 日本の結果を優先
+    const japan = data.results.filter(r => r.country_code === 'JP');
+    if (japan.length === 0) continue;
+
+    // 三重県優先
+    const mie = japan.filter(r => r.admin1 && r.admin1.includes('三重'));
+    if (mie.length > 0) return mie[0];
+
+    return japan[0];
+  }
+  throw new Error('場所が見つかりません');
+}
+
+// 天気取得
+async function getWeather(lat, lon) {
+  const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=cloud_cover,relative_humidity_2m,visibility,weather_code&timezone=Asia%2FTokyo`;
+  const res = await fetch(url);
+  return await res.json();
+}
+
+// ゲージSVGパス
+function getGaugePath(cx, cy, r, startAngle, endAngle) {
+  const s = startAngle * Math.PI / 180;
+  const e = endAngle * Math.PI / 180;
+  const x1 = cx + r * Math.cos(s);
+  const y1 = cy + r * Math.sin(s);
+  const x2 = cx + r * Math.cos(e);
+  const y2 = cy + r * Math.sin(e);
+  const large = endAngle - startAngle > 180 ? 1 : 0;
+  return `M ${x1} ${y1} A ${r} ${r} 0 ${large} 1 ${x2} ${y2}`;
+}
+
+function renderResult(score, moon, pollLevel, locationName, weather) {
+  const scoreColor = getScoreColor(score);
+  const pollInfo = getPollutionLabel(pollLevel);
+  const advice = getAdvice(score, moon, pollInfo);
+  
+  // ゲージ計算
+  const circumference = Math.PI * 80; // 半円の周長 (r=80のとき π*r)
+  const offset = circumference * (1 - score/100);
+  
+  const clouds = weather.current?.cloud_cover ?? 0;
+  const humidity = weather.current?.relative_humidity_2m ?? 0;
+  
+  document.getElementById('locationDisplay').textContent = locationName;
+  
+  document.getElementById('mainContent').innerHTML = `
+    <div class="gauge-section">
+      <div class="gauge-wrap">
+        <svg class="gauge-svg" viewBox="0 0 200 110">
+          <path class="gauge-bg" d="${getGaugePath(100, 100, 80, 180, 360)}" />
+          <path class="gauge-fill" id="gaugeFill"
+            d="${getGaugePath(100, 100, 80, 180, 360)}"
+            stroke="${scoreColor}"
+            style="stroke-dasharray: ${circumference}; stroke-dashoffset: ${circumference};"
+            filter="url(#glow)" />
+          <defs>
+            <filter id="glow">
+              <feGaussianBlur stdDeviation="3" result="blur"/>
+              <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+            </filter>
+          </defs>
+        </svg>
+        <div class="gauge-score">
+          <div class="number" id="scoreNum" style="color:${scoreColor}">0</div>
+          <div class="unit">/ 100</div>
+        </div>
+      </div>
+      <div class="gauge-label">星空指数</div>
+    </div>
+
+    <div class="cards">
+      <div class="card">
+        <div class="card-label">雲量</div>
+        <div class="card-value" style="color:${clouds < 30 ? 'var(--green-glow)' : clouds < 70 ? 'var(--gold)' : 'var(--red-glow)'}">${clouds}<span style="font-size:0.8rem">%</span></div>
+        <div class="card-sub">${clouds < 30 ? '快晴' : clouds < 70 ? '一部曇り' : '曇り'}</div>
+      </div>
+      <div class="card">
+        <div class="card-label">湿度</div>
+        <div class="card-value" style="color:${humidity < 50 ? 'var(--green-glow)' : humidity < 75 ? 'var(--gold)' : 'var(--red-glow)'}">${humidity}<span style="font-size:0.8rem">%</span></div>
+        <div class="card-sub">${humidity < 50 ? '乾燥' : humidity < 75 ? '適度' : '高湿度'}</div>
+      </div>
+      <div class="card">
+        <div class="card-label">月齢</div>
+        <div class="card-value"><span class="moon-icon">${moon.icon}</span></div>
+        <div class="card-sub">${moon.name}・影響${moon.impact}%</div>
+      </div>
+      <div class="card">
+        <div class="card-label">天候</div>
+        <div class="card-value" style="font-size:1rem">${getWeatherDesc(weather.current?.weather_code ?? 0)}</div>
+        <div class="card-sub">現在の状態</div>
+      </div>
+    </div>
+
+    <div class="pollution-card">
+      <div class="card-label">光害レベル</div>
+      <div class="pollution-bar-wrap">
+        <div class="pollution-bar">
+          <div class="pollution-bar-fill" id="pollBar" style="width:0%; background:${pollInfo.color}"></div>
+        </div>
+        <div class="pollution-level" style="color:${pollInfo.color}">Lv.${pollLevel} ${pollInfo.label}</div>
+      </div>
+    </div>
+
+    <div class="advice">${advice}</div>
+  `;
+
+  // アニメーション
+  setTimeout(() => {
+    // ゲージアニメ
+    document.getElementById('gaugeFill').style.strokeDashoffset = offset;
+    // 数字カウントアップ
+    let cur = 0;
+    const timer = setInterval(() => {
+      cur = Math.min(cur + 2, score);
+      document.getElementById('scoreNum').textContent = cur;
+      if (cur >= score) clearInterval(timer);
+    }, 20);
+    // 光害バー
+    setTimeout(() => {
+      document.getElementById('pollBar').style.width = (pollLevel * 10) + '%';
+    }, 200);
+  }, 100);
+}
+
+function getWeatherDesc(code) {
+  if (code === 0) return '☀️ 快晴';
+  if (code <= 2) return '🌤 晴れ';
+  if (code <= 3) return '☁️ 曇り';
+  if (code <= 49) return '🌫 霧';
+  if (code <= 67) return '🌧 雨';
+  if (code <= 77) return '❄️ 雪';
+  if (code <= 82) return '🌦 にわか雨';
+  return '⛈ 嵐';
+}
+
+async function search() {
+  const input = document.getElementById('locationInput').value.trim();
+  if (!input) return;
+  
+  document.getElementById('mainContent').innerHTML = '<div class="loading">SCANNING SKY DATA...</div>';
+  document.getElementById('locationDisplay').textContent = '検索中...';
+  
+  try {
+    const geo = await geocode(input);
+    const weather = await getWeather(geo.latitude, geo.longitude);
+    const moon = getMoonPhase();
+    const pollLevel = getLightPollution(geo.latitude, geo.longitude);
+    const score = calcStarIndex(weather.current, moon);
+    
+    const locName = geo.name + (geo.admin1 ? ', ' + geo.admin1 : '');
+    renderResult(score, moon, pollLevel, locName, weather);
+  } catch(e) {
+    document.getElementById('mainContent').innerHTML = `<div class="error-msg">⚠ ${e.message || 'データ取得に失敗しました'}</div>`;
+    document.getElementById('locationDisplay').textContent = '場所を検索してください';
+  }
+}
+
+
+function quickSearch(name) {
+  document.getElementById('locationInput').value = name;
+  search();
+}
+
+document.getElementById('locationInput').addEventListener('keydown', e => {
+  if (e.key === 'Enter') search();
+});
+
+// 初期表示
+document.getElementById('mainContent').innerHTML = '<div class="loading" style="animation:none;opacity:0.4">場所を入力して検索</div>';
+</script>
+</body>
+</html>
